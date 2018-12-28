@@ -32,28 +32,31 @@ docker-compose pull
 # Check if user set to use Special Conf Files
 if [ ! -z ${USE_NGINX_CONF_FILES+X} ] && [ "$USE_NGINX_CONF_FILES" = true ]; then
 
-    # Create the conf folder if it does not exists
-    mkdir -p $NGINX_FILES_PATH/conf.d
+    for directory in conf vhost; do
 
-    # Copy the special configurations to the nginx conf folder
-    cp -R ./conf.d/* $NGINX_FILES_PATH/conf.d
+        # Create the conf folder if it does not exists
+        mkdir -p $NGINX_FILES_PATH/$directory.d
 
-    # Check if there was an error and try with sudo
-    if [ $? -ne 0 ]; then
-        sudo cp -R ./conf.d/* $NGINX_FILES_PATH/conf.d
-    fi
+        # Copy the special configurations to the nginx conf folder
+        cp -R ./$directory.d/* $NGINX_FILES_PATH/$directory.d
+        # Check if there was an error and try with sudo
+        if [ $? -ne 0 ]; then
+            sudo cp -R ./$directory.d/* $NGINX_FILES_PATH/$directory.d
+        fi
 
-    # If there was any errors inform the user
-    if [ $? -ne 0 ]; then
-        echo
-        echo "#######################################################"
-        echo
-        echo "There was an error trying to copy the nginx conf files."
-        echo "The webproxy will still work, your custom configuration"
-        echo "will not be loaded."
-        echo 
-        echo "#######################################################"
-    fi
+        # If there was any errors inform the user
+        if [ $? -ne 0 ]; then
+            echo
+            echo "#######################################################"
+            echo
+            echo "There was an error trying to copy the nginx $directory files."
+            echo "The webproxy will still work, your custom configuration"
+            echo "will not be loaded."
+            echo
+            echo "#######################################################"
+        fi
+    done
+
 fi 
 
 # 7. Start proxy
